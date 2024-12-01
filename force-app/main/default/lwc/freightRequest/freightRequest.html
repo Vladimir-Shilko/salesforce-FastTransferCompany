@@ -1,0 +1,128 @@
+<template>
+  <lightning-card>
+    <div class="spinner-container">
+    <template if:true={isLoading}>
+        <div class="spinner-overlay">
+            <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+        </div>
+    </template>
+
+      <form onsubmit={handleSubmit}>
+          <div class="slds-p-around_medium">
+              <h1 class="slds-text-heading_medium slds-m-bottom_small">Company Information</h1>
+              <lightning-layout multiple-rows="true" horizontal-align="spread">
+                  <lightning-layout-item class="slds-p-around_x-small" size="4">
+                      <lightning-input type="text" label="Company Name *" name="companyName" required></lightning-input>
+                  </lightning-layout-item>
+                  <lightning-layout-item class="slds-p-around_x-small" size="4">
+                      <lightning-input type="email" label="Email *" name="companyEmail" required></lightning-input>
+                  </lightning-layout-item>
+                  <lightning-layout-item class="slds-p-around_x-small" size="4">
+                      <lightning-input
+                          type="tel"
+                          label="Phone *"
+                          name="companyPhone"
+                          pattern="^\+375-\d{2}-\d{7}$|^\+7-\d{3}-\d{7}$|^\+48-\d{2}-\d{7}$"
+                          required
+                      ></lightning-input>
+                  </lightning-layout-item>
+                  <lightning-layout-item class="slds-p-around_x-small" size="4">
+                <lightning-combobox
+                      onchange={accountTypeChange}
+                      label="Company Type *"
+                      name="companyType"
+                      options={accountTypes}
+                      required
+                  ></lightning-combobox>
+                </lightning-layout-item>
+              </lightning-layout>
+              
+              <h1 class="slds-text-heading_medium slds-m-top_large slds-m-bottom_small">Contact Information</h1>
+              <lightning-layout multiple-rows="true" horizontal-align="spread">
+                  <lightning-layout-item class="slds-p-around_x-small" size="4">
+                      <lightning-input type="text" label="First Name *" name="firstName" required></lightning-input>
+                  </lightning-layout-item>
+                  <lightning-layout-item class="slds-p-around_x-small" size="4">
+                      <lightning-input type="text" label="Last Name *" name="lastName" required></lightning-input>
+                  </lightning-layout-item>
+                  <lightning-layout-item class="slds-p-around_x-small" size="4">
+                      <lightning-input type="email" label="Email *" name="email" required></lightning-input>
+                  </lightning-layout-item>
+                  <lightning-layout-item class="slds-p-around_x-small" size="4">
+                      <lightning-input
+                          type="tel"
+                          label="Phone *"
+                          name="phone"
+                          pattern="^\+375-\d{2}-\d{7}$|^\+7-\d{3}-\d{7}$|^\+48-\d{2}-\d{7}$"
+                          required
+                      ></lightning-input>
+                  </lightning-layout-item>
+              </lightning-layout>
+
+      
+              <h1 class="slds-text-heading_medium slds-m-top_large slds-m-bottom_small">Order Information</h1>
+              <lightning-layout multiple-rows="true" horizontal-align="spread">
+                  <lightning-layout-item class="slds-p-around_x-small" size="4">
+                      <lightning-input type="text" label="Shipping Name *" name="shippingName" required></lightning-input>
+                  </lightning-layout-item>
+                  <lightning-layout-item class="slds-p-around_x-small" size="4">
+                      <lightning-input type="number" label="Cargo Weight *" name="cargoWeight" required></lightning-input>
+                  </lightning-layout-item>
+                  <lightning-layout-item class="slds-p-around_x-small" size="4">
+                      <lightning-combobox
+                          onchange={cargoTypeChange}
+                          label="Cargo Type *"
+                          name="cargoType"
+                          options={cargoTypeOptions}
+                          required
+                      ></lightning-combobox>
+                  </lightning-layout-item>
+                  <lightning-layout-item class="slds-p-around_x-small" size="4">
+                      <lightning-combobox
+                          onchange={fromCityChange}
+                          label="From (City) *"
+                          name="fromCity"
+                          options={cityOptions}
+                          required
+                      ></lightning-combobox>
+                  </lightning-layout-item>
+                  <lightning-layout-item class="slds-p-around_x-small" size="4">
+                      <lightning-combobox
+                          onchange={toCityChange}
+                          label="To (City) *"
+                          name="toCity"
+                          options={cityOptions}
+                          required
+                      ></lightning-combobox>
+                  </lightning-layout-item>
+                  <lightning-layout-item class="slds-p-around_x-small" size="4">
+                    <lightning-input
+                        type="date"
+                        label="Date *"
+                        name="date"
+                        required
+                        onchange={handleDateChange}
+                    ></lightning-input>
+                </lightning-layout-item>                
+                
+              </lightning-layout>
+              <lightning-layout>
+                  <lightning-layout-item class="slds-p-around_x-small" size="12">
+                      <textarea
+                          class="slds-textarea"
+                          placeholder="Comments..."
+                          name="comments"
+                          style="width: 100%;"
+                      ></textarea>
+                  </lightning-layout-item>
+              </lightning-layout>
+
+             
+              <div class="slds-grid slds-grid_align-end slds-m-top_large slds-scope footerContainer slds-grid slds-grid_align-spread">
+                  <lightning-button class="slds-button submit slds-p-around_x-small flow-button__NEXT" variant="brand" type="submit" label="Create a Request"></lightning-button>
+              </div>
+          </div>
+      </form>
+    </div>
+  </lightning-card>
+</template>
