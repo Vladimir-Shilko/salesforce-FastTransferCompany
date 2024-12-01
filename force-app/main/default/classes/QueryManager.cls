@@ -17,7 +17,7 @@ public without sharing class QueryManager {
     public static User getCurrentUser() {
         return [SELECT Id FROM User WHERE Id = :UserInfo.getUserId()];
     }
-
+    
     public static User getUserByContactId(Id contactId) {
         return [SELECT Id FROM User WHERE ContactId = :contactId LIMIT 1];
     }
@@ -34,7 +34,7 @@ public without sharing class QueryManager {
         return [
             SELECT Id, AccountId
             FROM Contact
-            WHERE Email = :email OR MobilePhone = :phone
+            WHERE Email = :email OR Phone = :phone
             LIMIT 1
         ];
     }

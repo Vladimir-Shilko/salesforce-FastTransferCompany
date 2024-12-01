@@ -1,22 +1,36 @@
 import { LightningElement, track, wire } from 'lwc';
+
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import {getObjectInfo, getPicklistValues} from 'lightning/uiObjectInfoApi';
+import { getRecord } from 'lightning/uiRecordApi';
 
 import createFreightRequest from '@salesforce/apex/FreightRequestController.createFreightRequest';
 
 import ACCOUNT from '@salesforce/schema/Account';
 import ACCOUNT_TYPE from '@salesforce/schema/Account.Type';
+import USER_ID from '@salesforce/user/Id';
+import NAME_FIELD from '@salesforce/schema/User.Name';
 
 export default class FreightRequestForm extends LightningElement {
 
   isLoading = false;
+  isUserAuthenticated = false
 
   accountTypes;
 
   accountRecordTypeId;
+
+  @wire(getRecord, { recordId: USER_ID, fields: [NAME_FIELD] }) 
+  wiredUser({ error, data }) {
+      if (data) {
+        this.isUserAuthenticated = true;
+      } else if (error) {
+          this.isUserAuthenticated = false;
+      }
+  }
+
   @wire(getObjectInfo, {objectApiName: ACCOUNT})results
   ({error, data}){
-    console.log('data: '+data);
     if(data){
       this.accountRecordTypeId = data.defaultRecordTypeId;
       this.error = undefined;
@@ -28,7 +42,6 @@ export default class FreightRequestForm extends LightningElement {
   }
   
   @wire(getPicklistValues, {recordTypeId : "$accountRecordTypeId", fieldApiName: ACCOUNT_TYPE})picklistResults({ error, data}){
-    console.log('data: '+data);
     if(data){
         this.accountTypes = data.values;
         this.error = undefined;

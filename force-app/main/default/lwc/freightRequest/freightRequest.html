@@ -9,18 +9,20 @@
 
       <form onsubmit={handleSubmit}>
           <div class="slds-p-around_medium">
+             <template if:false={isUserAuthenticated}>
               <h1 class="slds-text-heading_medium slds-m-bottom_small">Company Information</h1>
               <lightning-layout multiple-rows="true" horizontal-align="spread">
                   <lightning-layout-item class="slds-p-around_x-small" size="4">
-                      <lightning-input type="text" label="Company Name *" name="companyName" required></lightning-input>
+                      <lightning-input type="text" label="Company Name" name="companyName" required></lightning-input>
                   </lightning-layout-item>
                   <lightning-layout-item class="slds-p-around_x-small" size="4">
-                      <lightning-input type="email" label="Email *" name="companyEmail" required></lightning-input>
+                      <lightning-input type="email" label="Email" name="companyEmail" required></lightning-input>
                   </lightning-layout-item>
                   <lightning-layout-item class="slds-p-around_x-small" size="4">
                       <lightning-input
                           type="tel"
-                          label="Phone *"
+                          label="Phone"
+                          placeholder="pattern: +375-XX-XXXXXXX"
                           name="companyPhone"
                           pattern="^\+375-\d{2}-\d{7}$|^\+7-\d{3}-\d{7}$|^\+48-\d{2}-\d{7}$"
                           required
@@ -29,49 +31,50 @@
                   <lightning-layout-item class="slds-p-around_x-small" size="4">
                 <lightning-combobox
                       onchange={accountTypeChange}
-                      label="Company Type *"
+                      label="Company Type"
                       name="companyType"
                       options={accountTypes}
                       required
                   ></lightning-combobox>
                 </lightning-layout-item>
               </lightning-layout>
-              
+            
               <h1 class="slds-text-heading_medium slds-m-top_large slds-m-bottom_small">Contact Information</h1>
               <lightning-layout multiple-rows="true" horizontal-align="spread">
                   <lightning-layout-item class="slds-p-around_x-small" size="4">
-                      <lightning-input type="text" label="First Name *" name="firstName" required></lightning-input>
+                      <lightning-input type="text" label="First Name" name="firstName" required></lightning-input>
                   </lightning-layout-item>
                   <lightning-layout-item class="slds-p-around_x-small" size="4">
-                      <lightning-input type="text" label="Last Name *" name="lastName" required></lightning-input>
+                      <lightning-input type="text" label="Last Name" name="lastName" required></lightning-input>
                   </lightning-layout-item>
                   <lightning-layout-item class="slds-p-around_x-small" size="4">
-                      <lightning-input type="email" label="Email *" name="email" required></lightning-input>
+                      <lightning-input type="email" label="Email" name="email" required></lightning-input>
                   </lightning-layout-item>
                   <lightning-layout-item class="slds-p-around_x-small" size="4">
-                      <lightning-input
+                    <lightning-input
                           type="tel"
-                          label="Phone *"
+                          label="Phone"
+                          placeholder="pattern: +375-XX-XXXXXXX"
                           name="phone"
                           pattern="^\+375-\d{2}-\d{7}$|^\+7-\d{3}-\d{7}$|^\+48-\d{2}-\d{7}$"
                           required
-                      ></lightning-input>
+                    ></lightning-input>
                   </lightning-layout-item>
               </lightning-layout>
-
+            </template>
       
               <h1 class="slds-text-heading_medium slds-m-top_large slds-m-bottom_small">Order Information</h1>
               <lightning-layout multiple-rows="true" horizontal-align="spread">
                   <lightning-layout-item class="slds-p-around_x-small" size="4">
-                      <lightning-input type="text" label="Shipping Name *" name="shippingName" required></lightning-input>
+                      <lightning-input type="text" label="Shipping Name" name="shippingName" required></lightning-input>
                   </lightning-layout-item>
                   <lightning-layout-item class="slds-p-around_x-small" size="4">
-                      <lightning-input type="number" label="Cargo Weight *" name="cargoWeight" required></lightning-input>
+                      <lightning-input type="number" label="Cargo Weight" name="cargoWeight" required></lightning-input>
                   </lightning-layout-item>
                   <lightning-layout-item class="slds-p-around_x-small" size="4">
                       <lightning-combobox
                           onchange={cargoTypeChange}
-                          label="Cargo Type *"
+                          label="Cargo Type"
                           name="cargoType"
                           options={cargoTypeOptions}
                           required
@@ -80,7 +83,7 @@
                   <lightning-layout-item class="slds-p-around_x-small" size="4">
                       <lightning-combobox
                           onchange={fromCityChange}
-                          label="From (City) *"
+                          label="From (City)"
                           name="fromCity"
                           options={cityOptions}
                           required
@@ -89,7 +92,7 @@
                   <lightning-layout-item class="slds-p-around_x-small" size="4">
                       <lightning-combobox
                           onchange={toCityChange}
-                          label="To (City) *"
+                          label="To (City)"
                           name="toCity"
                           options={cityOptions}
                           required
@@ -98,7 +101,7 @@
                   <lightning-layout-item class="slds-p-around_x-small" size="4">
                     <lightning-input
                         type="date"
-                        label="Date *"
+                        label="Date"
                         name="date"
                         required
                         onchange={handleDateChange}
