@@ -2,33 +2,54 @@ public without sharing class FreightRequestController {
 
     @AuraEnabled
     public static void createFreightRequest(Map<String, String> requestData) {
-
-        FreightRequestData request = new FreightRequestData(requestData);
-
-        Contact contact = getContactByEmailAndPhone(request);
-
-        if (contact == null) {
-            contact = createContactFromLead(request);
+		
+        FreightRequestOrderData orderData = new FreightRequestOrderData(requestData);
+        
+        FreightRequestCustomerData customerData;
+        
+        User currentUser = QueryManager.getCurrentUserWithContactProfile();
+        
+        Contact contact;
+        if(currentUser != null){
+            contact = currentUser.Contact ?? null;
         }
-
-        if (contact == null) {
-            contact = createContactFromAccount(request);
+        
+        
+        try{
+            if(contact == null){
+            	customerData = new FreightRequestCustomerData(requestData);
+                if(customerData == null) throw new AuraException('Something went wrong with customer data');
+        	}
+        	else{
+            	customerData = null;
+        	}
         }
-
-        if(contact == null){
-            contact = createContactAndAccountReturningContact(request);
+        catch(Exception e){
+            throw new AuraException(e.getMessage());
         }
+        
+        
+        if(orderData == null) throw new AuraException('Something went wrong with order data');
+		
+        if(contact==null) contact = getContactByEmailAndPhone(customerData);
+
+        if (contact == null) contact = createContactFromLead(customerData);
+        
+        if (contact == null) contact = createContactFromAccount(customerData);
+        
+        if(contact == null) contact = createContactAndAccountReturningContact(customerData);
+        
         if (contact == null) return;
 
         User salesManager = QueryManager.getSalesManager();
-        createTask(contact.Id, salesManager.Id, request.shippingName);
+        createTask(contact.Id, salesManager.Id, orderData.shippingName);
 
         if (contact.AccountId == null) return;
 
-        createOpportunity(contact, request);
+        createOpportunity(contact, orderData);
     }
 
-    private static Contact getContactByEmailAndPhone(FreightRequestData request) {
+    private static Contact getContactByEmailAndPhone(FreightRequestCustomerData request) {
         List<Contact> foundContacts = QueryManager.getContactsByEmailOrPhone(request.email, request.phone);
         if (foundContacts == null || foundContacts.isEmpty()) {
             return null;
@@ -36,7 +57,7 @@ public without sharing class FreightRequestController {
         return foundContacts[0];
     }
 
-    private static Contact createContactFromLead(FreightRequestData request) {
+    private static Contact createContactFromLead(FreightRequestCustomerData request) {
         List<Lead> foundLeads = QueryManager.getLeadsByEmailOrPhone(request.email, request.phone);
 
         if (foundLeads == null || foundLeads.isEmpty()) return null;
@@ -55,7 +76,7 @@ public without sharing class FreightRequestController {
         
     }
 
-    private static Contact createContactFromAccount(FreightRequestData request) {
+    private static Contact createContactFromAccount(FreightRequestCustomerData request) {
         Account account;
 
         try {
@@ -69,7 +90,8 @@ public without sharing class FreightRequestController {
         return createContact(account, request);
 
     }
-    private static Contact createContactAndAccountReturningContact(FreightRequestData request){
+    private static Contact createContactAndAccountReturningContact(FreightRequestCustomerData request){
+        System.debug('Name: '+request);
         Account account = new Account(
             Name = request.companyName,
             Phone = request.companyPhone,
@@ -77,17 +99,18 @@ public without sharing class FreightRequestController {
             Type = request.companyType,
             OwnerId = QueryManager.getSalesManager().Id
         );
+        
         insert account;
 
         return createContact(account, request);
     }
-    private static Contact createContact(Account account, FreightRequestData request) {
+    private static Contact createContact(Account account, FreightRequestCustomerData request) {
         Contact contact = new Contact(
             AccountId = account.Id,
             FirstName = request.firstName,
             LastName = request.lastName,
             Email = request.email,
-            MobilePhone = request.phone,
+            Phone = request.phone,
             Language__c = 'EN'
         );
         insert contact;
@@ -104,7 +127,7 @@ public without sharing class FreightRequestController {
         insert task;
     }
 
-    private static void createOpportunity(Contact contact, FreightRequestData request) {
+    private static void createOpportunity(Contact contact, FreightRequestOrderData request) {
         Integer numberOfDays = Date.daysInMonth(Date.today().year(), Date.today().month());
         Date lastDayOfMonth = Date.newInstance(Date.today().year(), Date.today().month(), numberOfDays);
 

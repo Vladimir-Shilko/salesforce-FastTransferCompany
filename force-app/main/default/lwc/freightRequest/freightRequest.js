@@ -1,4 +1,4 @@
-import { LightningElement, track, wire } from 'lwc';
+import { LightningElement, wire } from 'lwc';
 
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import {getObjectInfo, getPicklistValues} from 'lightning/uiObjectInfoApi';
@@ -9,23 +9,27 @@ import createFreightRequest from '@salesforce/apex/FreightRequestController.crea
 import ACCOUNT from '@salesforce/schema/Account';
 import ACCOUNT_TYPE from '@salesforce/schema/Account.Type';
 import USER_ID from '@salesforce/user/Id';
-import NAME_FIELD from '@salesforce/schema/User.Name';
+import CONTACT_FIELD from '@salesforce/schema/User.ContactId';
 
 export default class FreightRequestForm extends LightningElement {
 
   isLoading = false;
-  isUserAuthenticated = false
+  isCustomerAuthenticated = false
 
   accountTypes;
 
   accountRecordTypeId;
 
-  @wire(getRecord, { recordId: USER_ID, fields: [NAME_FIELD] }) 
+  @wire(getRecord, { recordId: USER_ID, fields: [CONTACT_FIELD] }) 
   wiredUser({ error, data }) {
       if (data) {
-        this.isUserAuthenticated = true;
+        if(data?.fields?.ContactId?.value) {
+          this.isCustomerAuthenticated = true;
+          return;
+        }
+        this.isCustomerAuthenticated = false;
       } else if (error) {
-          this.isUserAuthenticated = false;
+          this.isCustomerAuthenticated = false;
       }
   }
 

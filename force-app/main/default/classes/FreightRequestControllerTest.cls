@@ -125,7 +125,7 @@ public class FreightRequestControllerTest {
             'companyEmail' => 'newaccounttt@test.com'
         };
 
-      
+      	Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator());
         Test.startTest();
         FreightRequestController.createFreightRequest(requestData);
         Test.stopTest();
