@@ -2,7 +2,7 @@ public without sharing class OrderQueryService {
 
     public static List<Offer__c> getRelatedOffers(Id orderId) {
         return [
-            SELECT Id, Name, Max_Price__c, Min_Price__c, Closed_Date__c, Shipping_Company_Owner__r.Name
+            SELECT Id, Name, Max_Price__c, Min_Price__c, Closed_Date__c, Status__c, Shipping_Company_Owner__r.Name
             FROM Offer__c
             WHERE Order__c = :orderId AND Status__c = 'New'
         ];

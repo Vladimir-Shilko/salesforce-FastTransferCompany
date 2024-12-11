@@ -5,6 +5,7 @@ public class OrderControllerTest {
     static void setupTestData() {
         // Create test user with Sales Manager profile
         Profile profile = [SELECT Id FROM Profile WHERE Name = 'Sales Manager' LIMIT 1];
+        UserRole srole = [SELECT Id from UserRole Where DeveloperName = 'CEO' LIMIT 1];
         User salesManager = new User(
             Username = 'salesmanagerrr@test.com',
             FirstName = 'Sales',
@@ -15,20 +16,25 @@ public class OrderControllerTest {
             LocaleSidKey = 'en_US',
             EmailEncodingKey = 'UTF-8',
             ProfileId = profile.Id,
-            LanguageLocaleKey = 'en_US'
+            LanguageLocaleKey = 'en_US',
+            UserRoleId = srole.Id
         );
         insert salesManager;
 
         // Create Account and Order
-        Account testAccount = new Account(Name = 'Test Account');
-        insert testAccount;
+        Account testAccount = new Account(Name = 'Test Account' , Email__c = 'contacttt@test.com');
+        System.runAs(salesManager){
+            insert testAccount;
+        }
 		Profile profilePortal  = [SELECT Id FROM Profile WHERE Name = 'FasTTransfer Client' LIMIT 1];
+        System.debug('profile portal: '+profilePortal);
         Contact shipToContact = new Contact(
             FirstName = 'Joe',
             LastName = 'ShipTo',
             AccountId = testAccount.Id
         );
-        insert shipToContact;
+         System.runAs(salesManager){
+             insert shipToContact;}
 		UserRole role = [SELECT Id from UserRole Where DeveloperName = 'CEO' LIMIT 1];
         User clientUser = new User(
             Username = 'clientuserrr@test.com',
@@ -39,14 +45,24 @@ public class OrderControllerTest {
             TimeZoneSidKey = 'America/New_York',
             LocaleSidKey = 'en_US',
             EmailEncodingKey = 'UTF-8',
-            ProfileId = profilePortal.Id,
+            
             LanguageLocaleKey = 'en_US',           
-            ContactId = shipToContact.Id
-            //UserRoleId = role.Id
+            ContactId = shipToContact.Id,
+            //UserRoleId = role.Id,
+            ProfileId = profilePortal.Id
         );
-        System.runAs ( new User(Id = UserInfo.getUserId()) ) {
+        UserRole userrole = [Select Id, DeveloperName From UserRole Where DeveloperName = 'CEO' Limit 1];
+
+		User adminUser = [Select Id, UserRoleId From User Where Profile.Name='System Administrator' Limit 1];
+
+		
+		//update adminUser;
+
+		//System.runAs(salesManager){
+        //System.runAs ( new User(Id = UserInfo.getUserId()) ) {
+        
     		insert clientUser;
-		}
+		//}
 
 
        
@@ -58,22 +74,27 @@ public class OrderControllerTest {
             StageName = 'Prospecting',
             CloseDate = Date.today().addMonths(1)
         );
-        insert testOpp;
+        System.runAs(salesManager){
+            insert testOpp;}
 		 Order testOrder = new Order(
             AccountId = testAccount.Id,
             EffectiveDate = Date.today(),
             ShipToContactId = shipToContact.Id,
-            OpportunityId = testOpp.Id
+            OpportunityId = testOpp.Id,
+             Status = 'New'
         );
-        insert testOrder;
+        System.runAs(salesManager){
+            insert testOrder;}
         // Create Offers
         Contact shippingOwnerContact = new Contact(
             FirstName = 'Shipper',
             LastName = 'Owner',
             AccountId = testAccount.Id
         );
-        insert shippingOwnerContact;
-
+        System.runAs(salesManager){
+            insert shippingOwnerContact;}
+		Profile profilePartner  = [SELECT Id FROM Profile WHERE Name = 'FasTTransfer Partner' LIMIT 1];
+        System.debug('partner profile: '+profilePartner);
         User shippingCompanyUser = new User(
             Username = 'shippingownerrr@test.com',
             FirstName = 'Shipper',
@@ -83,12 +104,13 @@ public class OrderControllerTest {
             TimeZoneSidKey = 'America/New_York',
             LocaleSidKey = 'en_US',
             EmailEncodingKey = 'UTF-8',
-            ProfileId = profile.Id,
             LanguageLocaleKey = 'en_US',
-            ContactId = shippingOwnerContact.Id
+            ContactId = shippingOwnerContact.Id,
+            ProfileId = profilePartner.Id
         );
-        insert shippingCompanyUser;
-
+        System.runAs(new User(Id = UserInfo.getUserId())){
+           insert shippingCompanyUser;
+        }
         Offer__c offer1 = new Offer__c(
             Name = 'Offer 1',
             Max_Price__c = 1000,
@@ -98,9 +120,11 @@ public class OrderControllerTest {
             Order__c = testOrder.Id,
             
             Special_Terms__c = 'Term 1',
-            Shipping_Company_Owner__c = shippingOwnerContact.Id
+            Shipping_Company_Owner__c = shippingCompanyUser.Id
         );
-        insert offer1;
+        System.runAs(new User(Id = UserInfo.getUserId())){
+           insert offer1;
+        }
 
         Offer__c offer2 = new Offer__c(
             Name = 'Offer 2',
@@ -110,9 +134,11 @@ public class OrderControllerTest {
             Status__c = 'New',
             Order__c = testOrder.Id,
             Special_Terms__c = 'Term 2',
-            Shipping_Company_Owner__c = shippingOwnerContact.Id
+            Shipping_Company_Owner__c = shippingCompanyUser.Id
         );
-        insert offer2;
+        System.runAs(new User(Id = UserInfo.getUserId())){
+           insert offer2;
+        }
     }
 
     @isTest
@@ -136,7 +162,7 @@ public class OrderControllerTest {
         
         List<Offer__c> offers = [SELECT Id FROM Offer__c WHERE Name = 'Offer 1' LIMIT 1];
         Account acc = [SELECT Id FROM Account WHERE Name = 'Test Account' LIMIT 1];
-        Order ord = [SELECT Id FROM Order WHERE AccountId = :acc.Id LIMIT 1];
+        Order ord = [SELECT Id, OpportunityId FROM Order WHERE AccountId = :acc.Id LIMIT 1];
         
         Test.startTest();
         OrderController.createContract(offers[0].Id, ord.Id);
@@ -152,7 +178,7 @@ public class OrderControllerTest {
         Offer__c selectedOffer = [SELECT Id, Status__c FROM Offer__c WHERE Id = :offers[0].Id LIMIT 1];
         System.assertEquals('Winner', selectedOffer.Status__c, 'Selected offer should be marked as Winner');
 
-        List<Offer__c> loserOffers = [SELECT Id FROM Offer__c WHERE Id != :offers[0].Id AND Order__c = :ord.Id];
+        List<Offer__c> loserOffers = [SELECT Id, Status__c FROM Offer__c WHERE Id != :offers[0].Id AND Order__c = :ord.Id];
         for (Offer__c loser : loserOffers) {
             System.assertEquals('Loser', loser.Status__c, 'Non-selected offers should be marked as Loser');
         }
