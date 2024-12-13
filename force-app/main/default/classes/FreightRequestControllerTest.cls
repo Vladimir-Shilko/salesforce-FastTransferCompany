@@ -3,7 +3,7 @@ public class FreightRequestControllerTest {
 
     @testSetup
     static void setupTestData() {
-        // Create a test Sales Manager user
+        
         Profile salesManagerProfile = [SELECT Id FROM Profile WHERE Name = 'Sales Manager' LIMIT 1];
         User salesManager = new User(
             Username = 'salesmanagerrr@test.com',

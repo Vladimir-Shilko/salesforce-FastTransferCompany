@@ -32,10 +32,7 @@ public without sharing class QueryManager {
     }
 
     public static Account getAccountByUser(Id userId) {
-        //Contact contact = [SELECT Id, AccountId FROM Contact WHERE Id IN (SELECT ContactId FROM User WHERE Id = :userId)] ?? null;
-        //if(contact == null) return null;
-        
-        //return contact.Account;
+
         return [SELECT Id FROM Account WHERE Id IN (SELECT AccountId FROM User WHERE Id = :userId) LIMIT 1];
     }
 
@@ -45,7 +42,7 @@ public without sharing class QueryManager {
 
     public static List<Contact> getContactsByEmailOrPhone(String email, String phone) {
         return [
-            SELECT Id, AccountId
+            SELECT Id, AccountId, Phone, Email
             FROM Contact
             WHERE Email = :email OR Phone = :phone
             LIMIT 1
@@ -54,7 +51,7 @@ public without sharing class QueryManager {
 
     public static List<Lead> getLeadsByEmailOrPhone(String email, String phone) {
         return [
-            SELECT Id
+            SELECT Id, Phone, Email
             FROM Lead
             WHERE Email = :email OR Phone = :phone
             LIMIT 1
@@ -90,7 +87,7 @@ public without sharing class QueryManager {
 
     public static Contact getContactById(Id contactId) {
         return [
-            SELECT Id, AccountId
+            SELECT Id, AccountId, Phone, Email
             FROM Contact
             WHERE Id = :contactId
             LIMIT 1

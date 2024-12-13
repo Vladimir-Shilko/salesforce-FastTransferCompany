@@ -5,6 +5,7 @@ public without sharing class FreightRequestOrderData extends FreightRequestData{
     public String cargoType { get; private set; }
     public String fromCity { get; private set; }
     public String toCity { get; private set; }
+    public Date orderDate { get; private set; }
 
     public FreightRequestOrderData(Map<String, String> data) {
         fill(data);
@@ -18,9 +19,10 @@ public without sharing class FreightRequestOrderData extends FreightRequestData{
             this.cargoType = validateString(data, 'cargoType');
             this.fromCity = validateString(data, 'fromCity');
             this.toCity = validateString(data, 'toCity');
+            this.orderDate = validateDate(data, 'date');
         } catch (Exception e) {
           
-            throw new AuraException('Error fetching current user data: ' + e.getMessage());
+            throw new AuraException('Error fetching current order data: ' + e.getMessage());
         }
     }
 

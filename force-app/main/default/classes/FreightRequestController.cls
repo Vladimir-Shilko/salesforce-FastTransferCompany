@@ -42,11 +42,22 @@ public without sharing class FreightRequestController {
         if (contact == null) return;
 
         User salesManager = QueryManager.getSalesManager();
-        createTask(contact.Id, salesManager.Id, orderData.shippingName);
+        try{
+            createTask(contact, salesManager.Id, orderData.shippingName, orderData.orderDate);
+        }
+        catch(Exception e){
+            throw new AuraException('error creating task: '+e.getMessage());
+        }
+        
 
         if (contact.AccountId == null) return;
 
+        try{
         createOpportunity(contact, orderData);
+        }
+        catch(Exception e){
+            throw new AuraException('error creating opportunity: '+e.getMessage());
+        }
     }
 
     private static Contact getContactByEmailAndPhone(FreightRequestCustomerData request) {
@@ -117,12 +128,16 @@ public without sharing class FreightRequestController {
         return contact;
     }
 
-    private static void createTask(Id contactId, Id managerId, String subject) {
+    private static void createTask(Contact contact, Id managerId, String subject, Date orderDate) {
         Task task = new Task(
             OwnerId = managerId,
             Subject = 'Freight Request: ' + subject,
-            WhoId = contactId,
-            Status = 'New'
+            WhoId = contact.Id,
+            WhatId = contact.AccountId,
+            Status = 'New',
+            Mobile_Phone__c = contact.Phone,
+            ActivityDate = orderDate,
+            Auto_Created__c = True
         );
         insert task;
     }
@@ -132,7 +147,7 @@ public without sharing class FreightRequestController {
         Date lastDayOfMonth = Date.newInstance(Date.today().year(), Date.today().month(), numberOfDays);
 
         Opportunity opp = new Opportunity(
-            Name = 'from Request:'+request.cargoType,
+            Name = 'from Request:'+request.shippingName,
             AccountId = contact.AccountId,
             Amount = 0,
             StageName = 'New',
